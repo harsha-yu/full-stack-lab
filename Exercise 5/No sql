@@ -1,0 +1,88 @@
+var MongoClient = require('mongodb').MongoClient; const express = require('express');
+var url="mongodb://localhost:27017/"; var dbo;
+var dbase='fs';
+// Connect to mongodb MongoClient.connect("mongodb://localhost:27017/", function(err, db) {
+if(!err) {
+console.log("We are connected");
+}
+});
+const app = express();
+// Create DB and Collection app.get('/createdb/:txt/:txtt', (req, res) => {
+dbase = req.param('txt'); var txx = req.param('txtt');
+MongoClient.connect(url, function(err, db) { if (err) throw err;
+dbo = db.db(dbase); dbo.createCollection(txx, function(err, res1) {
+if (err) throw err;
+res.send("Database and Collection created!");
+});
+});
+});
+ 
+
+// Insert data for Document 1 app.get('/addcardata/:modelno/:carname/:companyname', (req, res) => {
+
+MongoClient.connect(url, function(err, db) { if (err) throw err;
+var dbo = db.db(dbase); var myobj =
+{ modelno:req.param('modelno')+'',name:req.param('carname')+'', companyname:req.param('companyname')+''};
+dbo.collection("cars").insertOne(myobj, function(err, res1) { if (err) throw err;
+res.send(" document inserted"); db.close();
+});
+if (err) throw err;
+var dbo = db.db(dbase); var myobj =
+{ modelno:req.param('modelno')+'',uname:req.param('username')+''}; dbo.collection("user").insertOne(myobj, function(err, res1) {
+if (err) throw err;
+res.send(" document inserted"); db.close();
+ });
+ });
+ });
+ 
+// Select result by joining the table... app.get('/selecttables', (req, res) => {
+MongoClient.connect(url, function(err, db) { if (err) throw err;
+var dbo = db.db(dbase); dbo.collection('cars').aggregate([
+{ $lookup:
+{
+from: 'user', localField: 'modelno',
+foreignField: 'modelno', as: 'cars'
+}
+}
+]).toArray(function(err, res1) { if (err) throw err;
+res.send(JSON.stringify(res1)); db.close(); 
+});
+});
+});
+ 
+
+// Select result by carname... app.get('/searchbycarname/:txt', (req, res) => {
+var tx=req.param('txt')+''; MongoClient.connect(url, function(err, db) {
+if (err) throw err;
+var dbo = db.db(dbase); dbo.collection("cars").find({name:tx}).toArray(function(err, result) {
+if (err) throw err; res.send(result); db.close();
+ });
+ });
+ });
+ 
+// Select result by carno... app.get('/searchbycarno/:txt', (req, res) => {
+var tx=req.param('txt')+''; MongoClient.connect(url, function(err, db) {
+ 
+	});
+if (err) throw err;
+var dbo = db.db(dbase); dbo.collection("cars").find(
+{modelno:tx}).toArray(function(err, result) {
+if (err) throw err; res.send(result); db.close();
+});
+});
+});
+})
+
+// Select result by username... app.get('/searchbyusername/:txt', (req, res) => {
+var tx=req.param('txt')+''; MongoClient.connect(url, function(err, db) {
+if (err) throw err;
+var dbo = db.db(dbase); dbo.collection("user").find({uname:tx}).toArray(function(err, result) {
+if (err) throw err; res.send(result); db.close();
+});
+});
+});
+ 
+// Display first 5 rows... app.get('/displayfirst5', (req, res) => {
+MongoClient.connect(url, function(err, db) { if (err) throw err;
+var dbo = db.db(dbase); dbo.collection('cars').find().limit(5).toArray(function(err, result) {
+if (err) throw err; res.send(result); db.close();
