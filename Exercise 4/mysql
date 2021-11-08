@@ -1,0 +1,96 @@
+const express = require('express'); const mysql = require('mysql');
+
+// Create connection
+const db = mysql.createConnection({ host	: 'localhost',
+user	: 'root', password : 'gokulraj', database : 'time'
+});
+
+// Connect db.connect((err) => {
+if(err){
+throw err;
+ 
+});
+ 
+}
+console.log('MySql Connected...');
+ 
+const app = express();
+
+// Create DB
+app.get('/createdb/:txt', (req, res) => { var tx=req.param('txt');
+let sql = 'CREATE DATABASE '+tx;
+db.query(sql, (err, result) => { if(err) throw err; console.log(result); res.send('Database created...');
+});
+});
+// Insert data for table 1 app.get('/addcardata/:carname/:companyname', (req, res) => {
+let post = {name:req.param('carname')+'', companyname:req.param('companyname')+''};
+let sql = 'INSERT INTO cars SET ?';
+let query = db.query(sql, post, (err, result) => { if(err) throw err;
+console.log(result); res.send('Post added...');
+});
+});
+// Insert data for table 1 app.get('/adduserdata/:uname', (req, res) => {
+let post = {User_name:req.param('uname')+''}; let sql = 'INSERT INTO user SET ?';
+
+let query = db.query(sql, post, (err, result) => { if(err) throw err;
+console.log(result); res.send('Post added...');
+});
+});
+
+// Create table1 app.get('/createtable1', (req, res) => {
+let sql = 'CREATE TABLE cars(modelno int AUTO_INCREMENT, name VARCHAR(255), companyname VARCHAR(255), PRIMARY KEY(modelno))';
+db.query(sql, (err, result) => { if(err) throw err; console.log(result); res.send('Car table created...');
+});
+});
+// Create table2 app.get('/createtable2', (req, res) => {
+let sql = 'CREATE TABLE user(modelno int AUTO_INCREMENT, User_name VARCHAR(255), PRIMARY KEY(modelno))';
+db.query(sql, (err, result) => { if(err) throw err; console.log(result); res.send('user table created...');
+});
+});
+
+// Select result by joining the table... app.get('/selecttables', (req, res) => {
+let sql = 'select * from cars Natural join user'; db.query(sql, (err, result) => {
+if(err) throw err; console.log('printed'); res.send(result);
+});
+});
+
+// Select result by carname... app.get('/searchbycar/:txt', (req, res) => {
+var tx=req.param('txt');
+let sql = 'select * from cars Natural join user where name
+='+mysql.escape(tx); db.query(sql, (err, result) => {
+if(err) throw err; console.log('printed'); res.send(result);
+});
+});
+
+// Select result by model number... app.get('/searchbycarnumber/:txt', (req, res) => {
+var tx=req.param('txt');
+let sql = 'select * from cars Natural join user where modelno
+='+mysql.escape(tx); db.query(sql, (err, result) => {
+if(err) throw err; console.log('printed'); res.send(result);
+});
+});
+
+// Select result by user... app.get('/searchbyusername/:txt', (req, res) => {
+let sql = 'select * from cars Natural join user where User_name
+='+mysql.escape(tx); db.query(sql, (err, result) => {
+if(err) throw err; console.log('printed'); res.send(result);
+});
+});
+
+
+// Display first 5 rows... app.get('/displayfirst5', (req, res) => {
+var tx=req.param('txt');
+let sql = 'select * from cars Natural join user limit 5'; db.query(sql, (err, result) => {
+if(err) throw err; console.log('printed'); res.send(result);
+});
+});
+
+// Display recently added 5 rows... app.get('/displayrescently5', (req, res) => {
+var tx=req.param('txt');
+let sql = 'select * from cars Natural join user order by cars.modelno desc limit 5';
+db.query(sql, (err, result) => { if(err) throw err; console.log('printed'); res.send(result);
+});
+});
+app.listen('3030', () => {
+console.log('Server started on port 3030');
+});
